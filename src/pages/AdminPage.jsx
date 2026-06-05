@@ -11,6 +11,51 @@ function esPartidoBloqueado(partido) {
   return ahora >= kickoff
 }
 
+function CodigoPanel() {
+  const [codigo, setCodigo] = useState('')
+  const [actual, setActual] = useState('')
+  const [guardado, setGuardado] = useState(false)
+
+  useEffect(() => {
+    supabase.from('configuracion').select('valor').eq('clave', 'codigo_acceso').single()
+      .then(({ data }) => { if (data) { setActual(data.valor); setCodigo(data.valor) } })
+  }, [])
+
+  async function guardar() {
+    if (!codigo.trim()) return
+    const nuevo = codigo.toUpperCase().trim()
+    await supabase.from('configuracion').update({ valor: nuevo }).eq('clave', 'codigo_acceso')
+    setActual(nuevo)
+    setGuardado(true)
+    setTimeout(() => setGuardado(false), 2000)
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 20, borderColor: 'rgba(255,214,0,0.3)' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, color: 'var(--oro)' }}>
+        🔑 Código de acceso para registrarse
+      </div>
+      <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 700, color: 'var(--verde)', marginBottom: 8, letterSpacing: '0.15em' }}>
+        {actual || '---'}
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 12 }}>
+        Comparte este código con quienes pagaron. Sin él no pueden crear cuenta.
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
+          value={codigo}
+          onChange={e => setCodigo(e.target.value.toUpperCase())}
+          style={{ flex: 1, letterSpacing: '0.1em', fontWeight: 600, textTransform: 'uppercase' }}
+          placeholder="Nuevo código"
+        />
+        <button className="btn-primary" style={{ width: 'auto', padding: '10px 20px' }} onClick={guardar}>
+          {guardado ? '✓ Guardado' : 'Cambiar'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const { profile } = useAuth()
   const [resultados, setResultados] = useState({})
@@ -81,12 +126,14 @@ export default function AdminPage() {
   return (
     <div className="page">
       <div className="section-title">PANEL <span>ADMIN</span></div>
+
+      <CodigoPanel />
+
       <div className="alert alert-warn">
-        ⚠️ Solo ingresa resultados de partidos que ya terminaron. Esto actualiza los puntos de todos.
+        ⚠️ Solo ingresa resultados de partidos que ya terminaron.
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20, marginTop: 16 }}>
         {GRUPOS_LETRAS.map(g => (
           <button
             key={g}
@@ -114,11 +161,11 @@ export default function AdminPage() {
           return (
             <div key={partido.id} className={`partido-card ${tieneResultado ? 'jugado' : ''}`}>
               <div className="flex-between mb-16" style={{ flexWrap: 'wrap', gap: 4 }}>
-                <span className="partido-meta">P{partido.id} · {partido.fecha} {partido.hora} · {partido.estadio}</span>
+                <span className="partido-meta">P{partido.id} · {partido.fecha} · {partido.estadio}</span>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {!bloqueado && <span className="badge badge-gray">No iniciado</span>}
-                  {bloqueado && !tieneResultado && <span className="badge badge-oro">En juego / sin resultado</span>}
-                  {tieneResultado && <span className="badge badge-verde">Resultado cargado</span>}
+                  {bloqueado && !tieneResultado && <span className="badge badge-oro">Pendiente resultado</span>}
+                  {tieneResultado && <span className="badge badge-verde">✓ Cargado</span>}
                 </div>
               </div>
 
@@ -161,15 +208,13 @@ export default function AdminPage() {
                     {guardando[partido.id] ? '...' : guardado[partido.id] ? '✓' : 'Guardar'}
                   </button>
                   {tieneResultado && (
-                    <button className="btn-danger" onClick={() => borrar(partido.id)}>
-                      Borrar
-                    </button>
+                    <button className="btn-danger" onClick={() => borrar(partido.id)}>Borrar</button>
                   )}
                 </div>
               </div>
               {!bloqueado && (
                 <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>
-                  El partido no ha comenzado — no se puede cargar resultado todavía.
+                  El partido no ha comenzado — disponible el {partido.fecha} a las {partido.hora}
                 </div>
               )}
             </div>

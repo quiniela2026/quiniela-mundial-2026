@@ -18,10 +18,7 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        // Si acaba de registrarse, crear perfil si no existe
-        if (event === 'SIGNED_IN') {
-          await ensureProfile(session.user)
-        }
+        if (event === 'SIGNED_IN') await ensureProfile(session.user)
         fetchProfile(session.user.id)
       } else {
         setProfile(null)
@@ -32,22 +29,11 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function ensureProfile(user) {
-    // Verificar si ya existe el perfil
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single()
-
+    const { data: existing } = await supabase.from('profiles').select('id').eq('id', user.id).single()
     if (!existing) {
-      // Crear perfil con el nombre del metadata o email
       const nombre = user.user_metadata?.nombre || user.email.split('@')[0]
-      await supabase.from('profiles').insert({
-        id: user.id,
-        nombre,
-        email: user.email,
-        es_admin: false,
-      })
+      const codigo = user.user_metadata?.codigo_acceso || ''
+      await supabase.from('profiles').insert({ id: user.id, nombre, email: user.email, es_admin: false, codigo_usado: codigo })
     }
   }
 
@@ -57,26 +43,19 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }
 
-  async function signUp(email, password, nombre) {
+  async function signUp(email, password, nombre, codigoAcceso) {
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+      email, password,
       options: {
-        data: { nombre }, // guardamos nombre en metadata
+        data: { nombre, codigo_acceso: codigoAcceso },
         emailRedirectTo: window.location.origin,
       }
     })
     if (error) throw error
-
-    // Intentar crear perfil inmediatamente si el usuario ya está disponible
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: data.user.id,
-        nombre,
-        email,
-        es_admin: false,
+      await supabase.from('profiles').upsert({
+        id: data.user.id, nombre, email, es_admin: false, codigo_usado: codigoAcceso
       }, { onConflict: 'id' })
-      if (profileError) console.error('Profile creation error:', profileError)
     }
     return data
   }
