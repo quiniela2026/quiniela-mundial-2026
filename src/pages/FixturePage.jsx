@@ -7,7 +7,8 @@ import Footer from '../components/Footer'
 
 const GRUPOS_LETRAS = [...new Set(PARTIDOS.map(p => p.grupo))]
 
-function esPartidoBloqueado(partido) {
+function esPartidoBloqueado(partido, bloqueoGlobal) {
+  if (bloqueoGlobal) return true
   const ahora = new Date()
   const kickoff = new Date(`${partido.fecha}T${partido.hora}:00-04:00`)
   return ahora >= kickoff
@@ -28,14 +29,16 @@ export default function FixturePage() {
   const [errorGuard, setErrorGuard] = useState({})
   const [grupoActivo, setGrupoActivo] = useState('A')
   const [loading, setLoading] = useState(true)
+  const [bloqueoGlobal, setBloqueoGlobal] = useState(false)
   const timerRef = useRef({})
 
   useEffect(() => {
     async function load() {
       setLoading(true)
-      const [{ data: preds }, { data: resuls }] = await Promise.all([
+      const [{ data: preds }, { data: resuls }, { data: config }] = await Promise.all([
         supabase.from('predicciones').select('*').eq('user_id', user.id),
         supabase.from('resultados').select('*'),
+        supabase.from('configuracion').select('valor').eq('clave', 'predicciones_bloqueadas').single(),
       ])
       const predMap = {}
       preds?.forEach(p => { predMap[p.partido_id] = p })
@@ -43,6 +46,7 @@ export default function FixturePage() {
       resuls?.forEach(r => { resMap[r.partido_id] = r })
       setPredicciones(predMap)
       setResultados(resMap)
+      setBloqueoGlobal(config?.valor === 'true')
       setLoading(false)
     }
     load()
@@ -59,6 +63,7 @@ export default function FixturePage() {
   }
 
   const guardarPrediccion = async (partidoId) => {
+    if (bloqueoGlobal) return
     const pred = predicciones[partidoId]
     if (!pred) return
     if (pred.goles_local_pred === '' || pred.goles_visita_pred === '' ||
@@ -91,12 +96,17 @@ export default function FixturePage() {
 
   return (
     <div className="page">
+      {bloqueoGlobal && (
+        <div className="alert alert-warn mb-16" style={{ textAlign: 'center', fontSize: 15, fontWeight: 600 }}>
+          🔒 Las predicciones están cerradas. ¡El Mundial ya comenzó! ⚽
+        </div>
+      )}
+
       <div className="flex-between mb-16">
         <div className="section-title" style={{ marginBottom: 0 }}>GRUPO <span>{grupoActivo}</span></div>
         <div style={{ fontSize: 13, color: 'var(--text2)' }}>{completadasGrupo}/{partidosGrupo.length} listos</div>
       </div>
 
-      {/* Tabs grupos */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 20 }}>
         {GRUPOS_LETRAS.map(g => {
           const pts = PARTIDOS.filter(p => p.grupo === g)
@@ -120,7 +130,7 @@ export default function FixturePage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {partidosGrupo.map(partido => {
-          const bloqueado = esPartidoBloqueado(partido)
+          const bloqueado = esPartidoBloqueado(partido, bloqueoGlobal)
           const pred = predicciones[partido.id] || {}
           const resultado = resultados[partido.id]
           const jugado = resultado?.goles_local !== null && resultado?.goles_local !== undefined
@@ -134,7 +144,7 @@ export default function FixturePage() {
               <div className="flex-between mb-16" style={{ flexWrap: 'wrap', gap: 4 }}>
                 <span className="partido-meta">{formatFecha(partido.fecha, partido.hora)} · {partido.estadio}</span>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  {bloqueado && !jugado && <span className="badge badge-oro">En juego</span>}
+                  {bloqueado && !jugado && <span className="badge badge-oro">🔒 Cerrado</span>}
                   {jugado && <span className="badge badge-verde">Jugado</span>}
                   {pLabel && <span className={pLabel.clase}>{pLabel.texto}</span>}
                 </div>
@@ -156,27 +166,31 @@ export default function FixturePage() {
                       </div>
                       {tienePred && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>tu pred: {pred.goles_local_pred}-{pred.goles_visita_pred}</div>}
                     </>
-                  ) : bloqueado ? (
-                    <div>
-                      <div style={{ fontSize: 12, color: 'var(--text2)', marginBottom: 4 }}>cerrado</div>
-                      {tienePred ? (
-                        <div style={{ fontSize: 14, fontFamily: 'var(--font-display)', color: 'var(--oro)' }}>{pred.goles_local_pred} - {pred.goles_visita_pred}</div>
-                      ) : (
-                        <div style={{ fontSize: 12, color: 'var(--rojo)' }}>sin pred</div>
-                      )}
-                    </div>
                   ) : (
                     <div>
-                      <div className="score-input" style={{ justifyContent: 'center' }}>
-                        <input type="number" min="0" max="99" value={pred.goles_local_pred ?? ''} onChange={e => handleChange(partido.id, 'goles_local_pred', e.target.value)} onBlur={() => guardarPrediccion(partido.id)} style={{ width: 50 }} placeholder="?" />
-                        <span className="score-sep">-</span>
-                        <input type="number" min="0" max="99" value={pred.goles_visita_pred ?? ''} onChange={e => handleChange(partido.id, 'goles_visita_pred', e.target.value)} onBlur={() => guardarPrediccion(partido.id)} style={{ width: 50 }} placeholder="?" />
-                      </div>
-                      <div style={{ textAlign: 'center', height: 16, marginTop: 4 }}>
-                        {guardando[partido.id] && <span style={{ fontSize: 11, color: 'var(--text2)' }}>guardando…</span>}
-                        {guardado[partido.id] && <span style={{ fontSize: 11, color: 'var(--verde)' }}>✓ guardado</span>}
-                        {errorGuard[partido.id] && <span style={{ fontSize: 11, color: '#ff5252' }}>{errorGuard[partido.id]}</span>}
-                      </div>
+                      {tienePred ? (
+                        <div style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: bloqueado ? 'var(--oro)' : 'var(--verde)' }}>
+                          {pred.goles_local_pred} - {pred.goles_visita_pred}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 12, color: bloqueado ? '#ff5252' : 'var(--text2)' }}>
+                          {bloqueado ? '❌ sin pred' : 'sin predicción'}
+                        </div>
+                      )}
+                      {!bloqueado && (
+                        <div>
+                          <div className="score-input" style={{ justifyContent: 'center', marginTop: 4 }}>
+                            <input type="number" min="0" max="99" value={pred.goles_local_pred ?? ''} onChange={e => handleChange(partido.id, 'goles_local_pred', e.target.value)} onBlur={() => guardarPrediccion(partido.id)} style={{ width: 50 }} placeholder="?" />
+                            <span className="score-sep">-</span>
+                            <input type="number" min="0" max="99" value={pred.goles_visita_pred ?? ''} onChange={e => handleChange(partido.id, 'goles_visita_pred', e.target.value)} onBlur={() => guardarPrediccion(partido.id)} style={{ width: 50 }} placeholder="?" />
+                          </div>
+                          <div style={{ textAlign: 'center', height: 16, marginTop: 4 }}>
+                            {guardando[partido.id] && <span style={{ fontSize: 11, color: 'var(--text2)' }}>guardando…</span>}
+                            {guardado[partido.id] && <span style={{ fontSize: 11, color: 'var(--verde)' }}>✓ guardado</span>}
+                            {errorGuard[partido.id] && <span style={{ fontSize: 11, color: '#ff5252' }}>{errorGuard[partido.id]}</span>}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -192,7 +206,7 @@ export default function FixturePage() {
       </div>
 
       <div className="alert alert-info mt-24">
-        💡 Las predicciones se guardan automáticamente.
+        {bloqueoGlobal ? '🔒 Predicciones cerradas. Ya inició el Mundial.' : '💡 Las predicciones se guardan automáticamente.'}
       </div>
       <Footer />
     </div>
