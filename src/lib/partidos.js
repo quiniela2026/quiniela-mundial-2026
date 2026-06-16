@@ -113,12 +113,12 @@ export const PARTIDOS = [
   { id: 60, grupo: 'J', fecha: '2026-06-27', hora: '20:00', local: 'Argelia',         visita: 'Austria',             estadio: 'Dallas' },
 
   // GRUPO K — Portugal, Colombia, Uzbekistán, RD Congo
-  { id: 61, grupo: 'K', fecha: '2026-06-16', hora: '18:00', local: 'Portugal',        visita: 'Uzbekistán',          estadio: 'Atlanta' },
-  { id: 62, grupo: 'K', fecha: '2026-06-16', hora: '21:00', local: 'Colombia',        visita: 'RD Congo',            estadio: 'Miami' },
-  { id: 63, grupo: 'K', fecha: '2026-06-21', hora: '16:00', local: 'Portugal',        visita: 'Colombia',            estadio: 'Boston' },
-  { id: 64, grupo: 'K', fecha: '2026-06-21', hora: '16:00', local: 'Uzbekistán',      visita: 'RD Congo',            estadio: 'Houston' },
-  { id: 65, grupo: 'K', fecha: '2026-06-27', hora: '20:00', local: 'Portugal',        visita: 'RD Congo',            estadio: 'Nueva York/NJ' },
-  { id: 66, grupo: 'K', fecha: '2026-06-27', hora: '20:00', local: 'Colombia',        visita: 'Uzbekistán',          estadio: 'Kansas City' },
+  { id: 61, grupo: 'K', fecha: '2026-06-16', hora: '18:00', local: 'Portugal',        visita: 'RD Congo',            estadio: 'Atlanta' },
+  { id: 62, grupo: 'K', fecha: '2026-06-16', hora: '21:00', local: 'Uzbekistán',      visita: 'Colombia',            estadio: 'Miami' },
+  { id: 63, grupo: 'K', fecha: '2026-06-21', hora: '16:00', local: 'Portugal',        visita: 'Uzbekistán',          estadio: 'Boston' },
+  { id: 64, grupo: 'K', fecha: '2026-06-21', hora: '16:00', local: 'Colombia',        visita: 'RD Congo',            estadio: 'Houston' },
+  { id: 65, grupo: 'K', fecha: '2026-06-27', hora: '20:00', local: 'Colombia',        visita: 'Portugal',            estadio: 'Nueva York/NJ' },
+  { id: 66, grupo: 'K', fecha: '2026-06-27', hora: '20:00', local: 'RD Congo',        visita: 'Uzbekistán',          estadio: 'Kansas City' },
 
   // GRUPO L — Inglaterra, Croacia, Ghana, Panamá
   { id: 67, grupo: 'L', fecha: '2026-06-17', hora: '13:00', local: 'Inglaterra',      visita: 'Croacia',             estadio: 'Guadalajara' },
