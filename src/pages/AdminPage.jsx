@@ -6,12 +6,6 @@ import { calcularPuntos } from '../lib/puntos'
 
 const GRUPOS_LETRAS = [...new Set(PARTIDOS.map(p => p.grupo))]
 
-function esPartidoBloqueado(partido) {
-  const ahora = new Date()
-  const kickoff = new Date(`${partido.fecha}T${partido.hora}:00-04:00`)
-  return ahora >= kickoff
-}
-
 function CodigoPanel() {
   const [codigo, setCodigo] = useState('')
   const [actual, setActual] = useState('')
@@ -253,7 +247,7 @@ export default function AdminPage() {
       )}
 
       <div className="alert alert-warn" style={{ marginBottom: 12 }}>
-        ⚠️ Solo ingresa resultados de partidos que ya terminaron.
+        ⚠️ Solo ingresa resultados de partidos que ya terminaron en la realidad.
       </div>
 
       {/* Tabs grupos */}
@@ -270,7 +264,6 @@ export default function AdminPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {partidosGrupo.map(partido => {
-          const bloqueado = esPartidoBloqueado(partido)
           const inp = inputs[partido.id] || {}
           const tieneResultado = resultados[partido.id]?.goles_local !== undefined && resultados[partido.id]?.goles_local !== null
 
@@ -279,29 +272,27 @@ export default function AdminPage() {
               <div className="flex-between mb-16" style={{ flexWrap: 'wrap', gap: 4 }}>
                 <span className="partido-meta">P{partido.id} · {partido.fecha} · {partido.estadio}</span>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  {!bloqueado && <span className="badge badge-gray">No iniciado</span>}
-                  {bloqueado && !tieneResultado && <span className="badge badge-oro">Pendiente</span>}
+                  {!tieneResultado && <span className="badge badge-oro">Pendiente</span>}
                   {tieneResultado && <span className="badge badge-verde">✓ Cargado</span>}
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: 100 }}>
                   <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 4 }}>{FLAGS[partido.local] || '🏳️'} {partido.local}</div>
-                  <input type="number" min="0" max="99" value={inp.local ?? ''} onChange={e => handleChange(partido.id, 'local', e.target.value)} placeholder="Goles" style={{ width: 90 }} disabled={!bloqueado} />
+                  <input type="number" min="0" max="99" value={inp.local ?? ''} onChange={e => handleChange(partido.id, 'local', e.target.value)} placeholder="Goles" style={{ width: 90 }} />
                 </div>
                 <span style={{ color: 'var(--text2)', fontWeight: 700, fontSize: 20 }}>VS</span>
                 <div style={{ flex: 1, minWidth: 100 }}>
                   <div style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 4 }}>{FLAGS[partido.visita] || '🏳️'} {partido.visita}</div>
-                  <input type="number" min="0" max="99" value={inp.visita ?? ''} onChange={e => handleChange(partido.id, 'visita', e.target.value)} placeholder="Goles" style={{ width: 90 }} disabled={!bloqueado} />
+                  <input type="number" min="0" max="99" value={inp.visita ?? ''} onChange={e => handleChange(partido.id, 'visita', e.target.value)} placeholder="Goles" style={{ width: 90 }} />
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <button className="btn-primary" style={{ width: 'auto', padding: '10px 18px' }} onClick={() => guardar(partido)} disabled={!bloqueado || guardando[partido.id]}>
+                  <button className="btn-primary" style={{ width: 'auto', padding: '10px 18px' }} onClick={() => guardar(partido)} disabled={guardando[partido.id]}>
                     {guardando[partido.id] ? '...' : guardado[partido.id] ? '✓' : 'Guardar'}
                   </button>
                   {tieneResultado && <button className="btn-danger" onClick={() => borrar(partido.id)}>Borrar</button>}
                 </div>
               </div>
-              {!bloqueado && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>Disponible el {partido.fecha} a las {partido.hora}</div>}
             </div>
           )
         })}
