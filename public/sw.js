@@ -15,7 +15,21 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
+
+  const url = new URL(e.request.url)
+
+  // Sólo manejamos peticiones a NUESTRO propio origen (los archivos de la PWA).
+  // Cualquier petición a otro dominio (Supabase, OneSignal, CDNs, etc.) la dejamos
+  // pasar sin tocar, para no interferir ni devolver respuestas inválidas.
+  if (url.origin !== self.location.origin) return
+
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    fetch(e.request)
+      .catch(async () => {
+        const cached = await caches.match(e.request)
+        // Si tampoco está en caché, no inventamos una Response: dejamos que
+        // el error de red original se propague en vez de un undefined roto.
+        return cached || Response.error()
+      })
   )
 })

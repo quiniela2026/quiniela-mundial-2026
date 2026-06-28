@@ -20,17 +20,24 @@
 //   FIFA 86 (Argentina-CaboVerde)  -> 114
 //   FIFA 87 (Colombia-Ghana)       -> 115
 //   FIFA 88 (Australia-Egipto)    -> 116
+//
+// CORRECCIÓN (28-jun-2026): las llaves 201/202 y 207/208 tenían los rivales
+// cruzados entre sí. Verificado contra el bracket oficial (imagen FIFA):
+//   201 = Alemania/Paraguay (102) x Francia/Suecia (105)
+//   202 = Sudáfrica/Canadá (101) x P.Bajos/Marruecos (103)
+//   207 = Argentina/CaboVerde (114) x Australia/Egipto (116)
+//   208 = Suiza/Argelia (113) x Colombia/Ghana (115)
 
 // Octavos de final — cada llave indica qué dos partidos de 16avos alimentan el cruce
 export const LLAVES_OCTAVOS = [
-  { id: 201, fifaId: 89, equipoA: { ronda: 101 }, equipoB: { ronda: 102 }, fecha: '2026-07-04', estadio: 'Houston' },   // W73 x W75 -> Alemania/Paraguay x Sudáfrica/Canadá
-  { id: 202, fifaId: 90, equipoA: { ronda: 105 }, equipoB: { ronda: 103 }, fecha: '2026-07-04', estadio: 'Philadelphia' }, // W74 x W76 -> Francia/Suecia x P.Bajos/Marruecos
+  { id: 201, fifaId: 89, equipoA: { ronda: 102 }, equipoB: { ronda: 105 }, fecha: '2026-07-04', estadio: 'Houston' },   // W73 x W74 -> Alemania/Paraguay x Francia/Suecia
+  { id: 202, fifaId: 90, equipoA: { ronda: 101 }, equipoB: { ronda: 103 }, fecha: '2026-07-04', estadio: 'Philadelphia' }, // W75 x W76 -> Sudáfrica/Canadá x P.Bajos/Marruecos
   { id: 203, fifaId: 93, equipoA: { ronda: 104 }, equipoB: { ronda: 106 }, fecha: '2026-07-06', estadio: 'Dallas' },   // W77 x W78 -> Brasil/Japón x C.Marfil/Noruega
   { id: 204, fifaId: 96, equipoA: { ronda: 107 }, equipoB: { ronda: 108 }, fecha: '2026-07-05', estadio: 'Mexico City' }, // W79 x W80 -> México/Ecuador x Inglaterra/RDCongo
   { id: 205, fifaId: 94, equipoA: { ronda: 110 }, equipoB: { ronda: 109 }, fecha: '2026-07-06', estadio: 'Seattle' },  // W81 x W82 -> Bélgica/Senegal x EEUU/Bosnia
   { id: 206, fifaId: 95, equipoA: { ronda: 112 }, equipoB: { ronda: 111 }, fecha: '2026-07-06', estadio: 'Vancouver' }, // W84 x W83 -> España/Austria x Portugal/Croacia
-  { id: 207, fifaId: 91, equipoA: { ronda: 114 }, equipoB: { ronda: 115 }, fecha: '2026-07-07', estadio: 'Miami' },    // W86 x W87 -> Argentina/CaboVerde x Colombia/Ghana
-  { id: 208, fifaId: 92, equipoA: { ronda: 113 }, equipoB: { ronda: 116 }, fecha: '2026-07-07', estadio: 'Atlanta' },  // W85 x W88 -> Suiza/Argelia x Australia/Egipto
+  { id: 207, fifaId: 91, equipoA: { ronda: 114 }, equipoB: { ronda: 116 }, fecha: '2026-07-07', estadio: 'Miami' },    // W86 x W88 -> Argentina/CaboVerde x Australia/Egipto
+  { id: 208, fifaId: 92, equipoA: { ronda: 113 }, equipoB: { ronda: 115 }, fecha: '2026-07-07', estadio: 'Atlanta' },  // W85 x W87 -> Suiza/Argelia x Colombia/Ghana
 ]
 
 // Cuartos de final

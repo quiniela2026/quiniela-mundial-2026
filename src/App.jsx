@@ -12,6 +12,7 @@ import EliminatoriaPage from './pages/EliminatoriaPage'
 import RankingEliminatoriaPage from './pages/RankingEliminatoriaPage'
 import AdminEliminatoriaPage from './pages/AdminEliminatoriaPage'
 import BracketPage from './pages/BracketPage'
+import RondaPosteriorPage from './pages/RondaPosteriorPage'
 
 const IconFixture = () => <svg fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
 const IconRanking = () => <svg fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
@@ -44,6 +45,10 @@ function AppInner() {
     { id: 'fixture',      label: 'Fixture',     icon: <IconFixture /> },
     { id: 'ranking',      label: 'Ranking',     icon: <IconRanking /> },
     { id: 'eliminatoria', label: '16avos',      icon: <IconCopa /> },
+    { id: 'octavos',      label: '8vos',        icon: <IconCopa /> },
+    { id: 'cuartos',      label: '4tos',        icon: <IconCopa /> },
+    { id: 'semis',        label: 'Semis',       icon: <IconCopa /> },
+    { id: 'final',        label: 'Final',       icon: <IconCopa /> },
     { id: 'bracket',      label: 'Bracket',     icon: <IconTrofeo /> },
     { id: 'rankingElim',  label: 'Rank.Elim',   icon: <IconTrofeo /> },
     { id: 'comparacion',  label: 'Todos',       icon: <IconComparar /> },
@@ -69,6 +74,10 @@ function AppInner() {
       {tab === 'fixture'      && <FixturePage />}
       {tab === 'ranking'      && <RankingPage />}
       {tab === 'eliminatoria' && <EliminatoriaPage />}
+      {tab === 'octavos'      && <RondaPosteriorPage ronda="octavos" />}
+      {tab === 'cuartos'      && <RondaPosteriorPage ronda="cuartos" />}
+      {tab === 'semis'        && <RondaPosteriorPage ronda="semis" />}
+      {tab === 'final'        && <RondaPosteriorPage ronda="final" />}
       {tab === 'bracket'      && <BracketPage />}
       {tab === 'rankingElim'  && <RankingEliminatoriaPage />}
       {tab === 'comparacion'  && <ComparacionPage />}
