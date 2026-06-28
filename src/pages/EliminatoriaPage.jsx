@@ -34,7 +34,7 @@ export default function EliminatoriaPage() {
       const [{ data: preds }, { data: resuls }, { data: config }] = await Promise.all([
         supabase.from('predicciones_eliminatoria').select('*').eq('user_id', user.id),
         supabase.from('resultados_eliminatoria').select('*'),
-        supabase.from('configuracion').select('valor').eq('clave', 'predicciones_bloqueadas').single(),
+        supabase.from('configuracion').select('valor').eq('clave', 'predicciones_bloqueadas_eliminatoria').single(),
       ])
       const predMap = {}
       preds?.forEach(p => { predMap[p.partido_id] = p })
